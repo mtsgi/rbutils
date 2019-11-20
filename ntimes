@@ -1,0 +1,7 @@
+#!/usr/bin/ruby
+
+def ntimes (n)
+    n.to_i.times { yield }
+end
+
+ntimes ARGV[0] do p 'hello' end

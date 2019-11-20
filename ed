@@ -1,0 +1,101 @@
+#!/usr/bin/ruby
+
+require 'delegate'
+require 'optparse'
+
+class Ed < DelegateClass(Array)
+    @@addr_re = '(?:|\d+|[.$,;])'
+    @@cmd_re = '(?:wq|[acdgijnpqrw=]|\z)'
+    @@params_re = '(?:.+)'
+
+    @@cmd_list = {
+        'a': :append,
+        'c': :change,
+        'd': :delete,
+        'f': :filename,
+        'g': :grep,
+        'i': :insert,
+        'j': :join,
+        'n': :print_with_line,
+        'p': :print,
+        'q': :quit,
+        'w': :write,
+        '=': :line,
+        'wq': :write_quit,
+        '': :set
+    }
+
+    @@cmd_list.default = :error
+
+    def initialize
+        super([])
+        @current = 0
+        @last = 0
+        @prompt = '> '
+        @buffer = ARGF.readlines
+
+        puts 'File was loaded. LINES:' + @buffer.length.to_s
+
+        @message = ''
+        @command = ''
+
+        op = OptionParser.new
+        op.on '-p prompt' do |v|
+            @prompt = v
+        end
+        op.parse!(ARGV)
+
+        begin
+            # self.concat(ARGF.readlines)
+            # p self.reduce(0) {|s, l| s + l.bytesize}
+            @last = @current = self.length
+        rescue => exception
+            puts exception
+        end
+
+        loop {
+            read
+            eval
+            print
+        }
+    end
+
+    def read
+        Kernel.print @current.to_s + ' ' + @prompt
+        @command = STDIN.gets.chomp
+    end
+
+    def eval
+        unless @command =~ /\A(#{@@addr_re}(?:,#{@@addr_re})?)?(#{@@cmd_re})\s*(#{@@params_re})?\z/
+            @message = '?'
+            return
+        end
+
+        p [$1, $2, $3, $4]
+
+        if $2 == 'p'
+            if $1 =~ /^(?:.*),(?:.*)$/
+                _line = $1.to_i - 1 || @current
+            else
+                _line = $1.to_i - 1 || @current
+                _line = @current if $1 == '.'
+            end
+            puts @buffer[_line].to_s
+        elsif $2 == 'q'
+            exit
+        elsif $2 == 'a'
+            addresses ||= '.'
+            @message = 'Append'
+        elsif $2 == ''
+            @current = $1.to_i
+            @message = 'Moved to ' + @current.to_s
+        end
+    end
+
+    def print
+        puts 'MESSAGE: ' + @message unless @message.length == 0
+        @message = ''
+    end
+end
+
+Ed.new

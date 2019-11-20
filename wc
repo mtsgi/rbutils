@@ -1,0 +1,15 @@
+#!/usr/bin/ruby
+
+f = open(ARGV[0])
+wn = 0
+
+f.each do |l|
+    wn += l.scan(/\w+/).length
+end
+
+puts "[#{ARGV[0]}]"
+puts " Words\t" + wn.to_s
+puts " Lines\t" + f.lineno.to_s
+puts " Size\t" + f.size.to_s
+
+f.close
