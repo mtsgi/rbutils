@@ -34,7 +34,7 @@ class Ed < DelegateClass(Array)
         @prompt = '> '
         @buffer = ARGF.readlines
 
-        puts 'File was loaded. LINES:' + @buffer.length.to_s
+        puts 'Read a file. LINES:' + @buffer.length.to_s
 
         @message = ''
         @command = ''

@@ -1,0 +1,15 @@
+#!/usr/bin/ruby
+
+def myfilter (enum)
+    r = []
+    enum.each do |n|
+        r << n if yield(n)
+    end
+    r
+end
+
+a = myfilter [1, 2, 3, 4] { |n|
+    n % 2 == 0
+}
+
+p a
